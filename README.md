@@ -7,14 +7,15 @@ Running ohara\_apd\_comparison.py shows a subtler example where the difference i
 
 # Running
 
-First install a virtual environment and install the requirements.
+First install a virtual environment and install the requirements. First you will need to install the requirements for myokit http://myokit.org/linux then do
+
 ``` 
 python3 -m venv venv
 activate venv/bin/activate
-pip -r requirements.txt
+pip install -r requirements.txt
 ```
 
-The run either 
+Then run either 
 ```
 python3 decker_bifurcation_diagram.py
 ```
