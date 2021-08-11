@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import pandas as pd
 import numpy as np
 import myokit
@@ -59,6 +60,8 @@ def run_from_states(steady_state_file, mmt_file, period=1000, block=0):
     return apds, s
 
 def make_plot(mmt_file, steady_state_files, output_name="output.pdf", period=1000, block=0, output_dir=""):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     apds1, s1 = run_from_states(steady_state_files[0], mmt_file, period, block)
     apds2, s2 = run_from_states(steady_state_files[1], mmt_file, period, block)
 
