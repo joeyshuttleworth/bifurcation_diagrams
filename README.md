@@ -9,7 +9,7 @@ Running ohara\_apd\_comparison.py shows a subtler example where the difference i
 
 First install a virtual environment and install the requirements.
 ``` 
-python3 -m venv .
+python3 -m venv venv
 activate venv/bin/activate
 pip -r requirements.txt
 ```
