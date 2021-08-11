@@ -10,8 +10,23 @@ import re
 
 def run_from_states(steady_state_file, mmt_file, period=1000, block=0, pre_paces=100):
     # Oxmeta tag for the gkr_variable
+    gkr_var_meta = "membrane_rapid_delayed_rectifier_potassium_current_conductance"
+
     # Get model and protocol, create simulation
     m, p, x = myokit.load(mmt_file)
+
+    # Get gkr var label
+    gkr_var_label=""
+    # Get gkr variable
+    for var in m.variables(deep=True):
+        if 'oxmeta' in var.meta:
+            if var.meta['oxmeta'] == gkr_var_meta:
+                gkr_var_label = var.qname()
+                break
+    print(gkr_var_label)
+
+    original_max_gkr = m.get(gkr_var_label).eval()
+    gkr_value =  original_max_gkr*(1-block)
 
     # Get qname for voltage
     voltage_qname = next(filter(lambda var: var.meta['oxmeta']=="analytic_voltage" if 'oxmeta' in var.meta else False, m.variables()))
@@ -34,10 +49,7 @@ def run_from_states(steady_state_file, mmt_file, period=1000, block=0, pre_paces
                     state_string = state_string + "{} = {}\n".format(qname, df[column].values[0])
         m.set_state(m.map_to_state(state_string))
 
-
-    apds=[]
-
-    state = m.state()
+    m.set_value(gkr_var_label, gkr_value)
     # Set protocol
     duration = p.head().duration()
     level    = p.head().level()*2
@@ -52,7 +64,7 @@ def run_from_states(steady_state_file, mmt_file, period=1000, block=0, pre_paces
     vt = 0.9 * m.get(voltage_qname).eval()
 
     s.pre(period*pre_paces)
-    d = s.run(1000*period)
+    d = s.run(5000*period)
 
     state=m.state()
 
