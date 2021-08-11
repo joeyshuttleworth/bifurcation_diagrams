@@ -58,7 +58,7 @@ def run_from_states(steady_state_file, mmt_file, period=1000, block=0):
     apds=d.apd(voltage_qname,  vt)['duration']
     return apds, s
 
-def make_plot(mmt_file, steady_state_files, output_name="output.pdf", period=1000, block=0):
+def make_plot(mmt_file, steady_state_files, output_name="output.pdf", period=1000, block=0, output_dir=""):
     apds1, s1 = run_from_states(steady_state_files[0], mmt_file, period, block)
     apds2, s2 = run_from_states(steady_state_files[1], mmt_file, period, block)
 
@@ -70,19 +70,20 @@ def make_plot(mmt_file, steady_state_files, output_name="output.pdf", period=100
     plt.ylabel("apd /ms")
     plt.title("AP90 comparison")
     plt.legend()
-    plt.savefig("{}_apds.pdf".format(output_name))
+    plt.savefig(os.path.join(output_dir, "{}_apds.pdf".format(output_name)))
     plt.clf()
 
     # Compare action potentials
-    d1 = s1.run(period)
-    d2 = s2.run(period)
+    d1 = s1.run(period-1)
+    d2 = s2.run(period-1)
     plt.plot(np.mod(d1['environment.time'], period), d1['membrane.v'])
     plt.plot(np.mod(d2['environment.time'], period), d2['membrane.v'])
-    plt.savefig(output_name + "final_action_potentials.pdf")
+    plt.savefig(os.path.join(output_dir, output_name + "final_action_potentials.pdf"))
     plt.clf()
 
 
 
 if __name__ == "__main__":
-    make_plot("ohara_2017.mmt", [None, "ohara_2017_bad.csv"], "ohara_rudy_2017_bifurcation", 1250, 0.5)
+    output_dir = "output"
+    make_plot("ohara_2017.mmt", [None, "ohara_2017_bad.csv"], "ohara_rudy_2017_bifurcation", 1250, 0.5, output_dir=output_dir)
 
