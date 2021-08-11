@@ -50,8 +50,8 @@ def run_from_states(steady_state_file, mmt_file, period=1000, block=0):
 
     vt = 0.9 * m.get(voltage_qname).eval()
 
-    s.pre(period*5000)
-    d = s.run(500*period)
+    s.pre(period*10000)
+    d = s.run(1000*period)
 
     state=m.state()
 
