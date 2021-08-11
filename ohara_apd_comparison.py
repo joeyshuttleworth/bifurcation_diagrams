@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 import os
+import argparse
 import pandas as pd
 import numpy as np
 import myokit
 import matplotlib.pyplot as plt
 import re
 
-def run_from_states(steady_state_file, mmt_file, period=1000, block=0):
+def run_from_states(steady_state_file, mmt_file, period=1000, block=0, pre_paces=100):
     # Oxmeta tag for the gkr_variable
     # Get model and protocol, create simulation
     m, p, x = myokit.load(mmt_file)
@@ -50,7 +51,7 @@ def run_from_states(steady_state_file, mmt_file, period=1000, block=0):
 
     vt = 0.9 * m.get(voltage_qname).eval()
 
-    s.pre(period*10000)
+    s.pre(period*pre_paces)
     d = s.run(1000*period)
 
     state=m.state()
@@ -59,16 +60,20 @@ def run_from_states(steady_state_file, mmt_file, period=1000, block=0):
     apds=d.apd(voltage_qname,  vt)['duration']
     return apds, s
 
-def make_plot(mmt_file, steady_state_files, output_name="output.pdf", period=1000, block=0, output_dir=""):
+def make_plot(mmt_file, steady_state_files, period=1000, block=0, output_name="or_2017_bifurcation", args=None):
+    if args is not None:
+        output_dir = args.output_dir
+        pre_paces = args.pre_paces
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    apds1, s1 = run_from_states(steady_state_files[0], mmt_file, period, block)
-    apds2, s2 = run_from_states(steady_state_files[1], mmt_file, period, block)
+
+    apds1, s1 = run_from_states(steady_state_files[0], mmt_file, period, block, pre_paces)
+    apds2, s2 = run_from_states(steady_state_files[1], mmt_file, period, block, pre_paces)
 
     print(apds1, apds2)
 
-    plt.plot(apds1, label="initially using EAD steady state")
-    plt.plot(apds2, label="initially using steady state with no EAD")
+    plt.plot(apds1, label="initially using 'bad' initial conditions")
+    plt.plot(apds2, label="initially using default initial conditions")
 
     plt.ylabel("apd /ms")
     plt.title("AP90 comparison")
@@ -87,6 +92,9 @@ def make_plot(mmt_file, steady_state_files, output_name="output.pdf", period=100
 
 
 if __name__ == "__main__":
-    output_dir = "output"
-    make_plot("ohara_2017.mmt", [None, "ohara_2017_bad.csv"], "ohara_rudy_2017_bifurcation", 1250, 0.5, output_dir=output_dir)
+    parser = argparse.ArgumentParser(description="Show two different steady states which exists for the O'Hara Rudy 2017 model under certain conditions")
+    parser.add_argument("-p", "--pre_paces", help="The number of paces to run before data logging starts", type=int, default=1000)
+    parser.add_argument("-o", "--output_dir", help="The directory to output plots to", default="output", type=str)
+    args = parser.parse_args()
+    make_plot("ohara_2017.mmt", [None, "ohara_2017_bad.csv"], 1250, 0.5, "ohara_rudy_2017_bifurcation", args=args)
 
